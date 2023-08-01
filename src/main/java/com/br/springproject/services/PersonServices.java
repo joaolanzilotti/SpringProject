@@ -1,5 +1,6 @@
 package com.br.springproject.services;
 
+import com.br.springproject.controllers.PersonController;
 import com.br.springproject.dto.PersonDTO;
 import com.br.springproject.entities.Person;
 import com.br.springproject.exceptions.ObjectNotFoundException;
@@ -8,6 +9,8 @@ import com.google.gson.reflect.TypeToken;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -24,34 +27,43 @@ public class PersonServices {
     @Autowired
     private ModelMapper modelMapper;
 
-    public PersonDTO findById(Long id){
+    public PersonDTO findById(Long id) {
         logger.info("Finding person by id");
-        return modelMapper.map(personRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Person Not Found!")), PersonDTO.class);
+        PersonDTO personDTO = modelMapper.map(personRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Person Not Found!")), PersonDTO.class);
+        personDTO.add(linkTo(methodOn(PersonController.class).findPersonById(id)).withSelfRel());
+        return personDTO;
     }
 
-    public List<PersonDTO> findAll(){
+    public List<PersonDTO> findAll() {
         logger.info("Finding all persons!");
         List<Person> listPersons = personRepository.findAll();
-        Type listType = new TypeToken<List<PersonDTO>>() {}.getType();
+        Type listType = new TypeToken<List<PersonDTO>>() {
+        }.getType();
 
-        return modelMapper.map(listPersons, listType);
+        List<PersonDTO> listPersonDTO = modelMapper.map(listPersons, listType);
+        listPersonDTO.stream().forEach(dto -> dto.add(linkTo(methodOn(PersonController.class).findPersonById(dto.getId())).withSelfRel()));
+        return listPersonDTO;
     }
 
-    public PersonDTO addPerson(PersonDTO personDTO){
+    public PersonDTO addPerson(PersonDTO personDTO) {
         logger.info("Adding new person");
         Person person = personRepository.save(modelMapper.map(personDTO, Person.class));
-        return modelMapper.map(person, PersonDTO.class);
+        PersonDTO pd = modelMapper.map(person, PersonDTO.class);
+        pd.add(linkTo(methodOn(PersonController.class).addPerson(pd)).withSelfRel());
+        return pd;
     }
 
-    public PersonDTO updatePerson(PersonDTO personDTO, Long id){
+    public PersonDTO updatePerson(PersonDTO personDTO, Long id) {
         personRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("No records found for this ID!"));
         logger.info("Updating person");
         personDTO.setId(id);
         Person person = personRepository.save(modelMapper.map(personDTO, Person.class));
-        return modelMapper.map(person, PersonDTO.class);
+        PersonDTO pd = modelMapper.map(person, PersonDTO.class);
+        pd.add(linkTo(methodOn(PersonController.class).updatePerson(personDTO, id)).withSelfRel());
+        return pd;
     }
 
-    public void deletePerson(Long id){
+    public void deletePerson(Long id) {
         logger.info("Deleting person");
         personRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("No records found for this ID!"));
         personRepository.deleteById(id);
