@@ -49,7 +49,7 @@ public class PersonServices {
         logger.info("Adding new person");
         Person person = personRepository.save(modelMapper.map(personDTO, Person.class));
         PersonDTO pd = modelMapper.map(person, PersonDTO.class);
-        pd.add(linkTo(methodOn(PersonController.class).addPerson(pd)).withSelfRel());
+        pd.add(linkTo(methodOn(PersonController.class).findPersonById(pd.getId())).withSelfRel());
         return pd;
     }
 
