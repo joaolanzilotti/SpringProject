@@ -3,7 +3,9 @@ package com.br.springproject.services;
 import com.br.springproject.dto.PersonDTO;
 import com.br.springproject.entities.Person;
 import com.br.springproject.exceptions.ObjectNotFoundException;
+import com.br.springproject.exceptions.RequiredObjectIsNulException;
 import com.br.springproject.repositories.PersonRepository;
+import com.google.gson.reflect.TypeToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -16,9 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
+import java.lang.reflect.Type;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,22 +40,21 @@ class PersonServicesTest {
 
     private Person person;
     private PersonDTO personDTO;
+    List<PersonDTO> listPersonDTO = new ArrayList<>();
+    List<Person> listPersons = new ArrayList<>();
 
     @BeforeEach
-    void setUpMocks() throws Exception{
+    void setUpMocks() throws Exception {
         MockitoAnnotations.openMocks(this);
         startPerson();
     }
 
     @Test
     void findById() {
-        // Create and set up the person mock
         Mockito.when(personRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(person));
 
-        // Set up the ModelMapper mock to return the expected PersonDTO
         Mockito.when(modelMapper.map(person, PersonDTO.class)).thenReturn(personDTO);
 
-        // Test the findById method
         PersonDTO response = personServices.findById(1L);
 
         assertNotNull(response);
@@ -63,8 +63,8 @@ class PersonServicesTest {
         assertNotNull(response.getBirthday());
         assertNotNull(response.getEmail());
         assertNotNull(response.getPassword());
+        assertNotNull(response.getLinks());
 
-        System.out.println(response.toString());
         assertTrue(response.toString().contains("[<http://localhost/person/1>;rel=\"self\"]"));
         assertEquals(1L, response.getId());
         assertEquals("Joao", response.getName());
@@ -74,6 +74,46 @@ class PersonServicesTest {
 
     @Test
     void findAll() {
+
+        Type listType = new TypeToken<List<PersonDTO>>() {
+        }.getType();
+
+        Mockito.when(personRepository.findAll()).thenReturn(listPersons);
+
+        Mockito.when(modelMapper.map(listPersons, listType)).thenReturn(listPersonDTO);
+
+        List<PersonDTO> response = personServices.findAll();
+
+        assertNotNull(response);
+        assertNotNull(response.get(0).getId());
+        assertNotNull(response.get(0).getName());
+        assertNotNull(response.get(0).getEmail());
+        assertNotNull(response.get(0).getBirthday());
+        assertNotNull(response.get(0).getPassword());
+        assertNotNull(response.get(0).getLinks());
+
+        assertEquals(1L, response.get(0).getId());
+        assertEquals("joao@gmail.com", response.get(0).getEmail());
+        assertEquals("Joao", response.get(0).getName());
+        assertEquals("123456789", response.get(0).getPassword());
+        assertTrue(response.get(0).toString().contains("[<http://localhost/person/1>;rel=\"self\"]"));
+
+        assertNotNull(response.get(1).getId());
+        assertNotNull(response.get(1).getName());
+        assertNotNull(response.get(1).getEmail());
+        assertNotNull(response.get(1).getBirthday());
+        assertNotNull(response.get(1).getPassword());
+        assertNotNull(response.get(1).getLinks());
+
+        assertEquals(2L, response.get(1).getId());
+        assertEquals("maria@gmail.com", response.get(1).getEmail());
+        assertEquals("Maria", response.get(1).getName());
+        assertEquals("987654321", response.get(1).getPassword());
+        assertTrue(response.get(1).toString().contains("[<http://localhost/person/2>;rel=\"self\"]"));
+
+        assertFalse(response.isEmpty());
+        assertEquals(12, response.size());
+
     }
 
     @Test
@@ -91,12 +131,26 @@ class PersonServicesTest {
         assertNotNull(response.getBirthday());
         assertNotNull(response.getEmail());
         assertNotNull(response.getPassword());
+        assertNotNull(response.getLinks());
 
-        System.out.println(response.toString());
         assertEquals(1L, response.getId());
         assertEquals("Joao", response.getName());
         assertEquals("joao@gmail.com", response.getEmail());
         assertEquals("123456789", response.getPassword());
+
+
+    }
+
+    @Test
+    void addPersonWithNullPerson() {
+
+        Exception exception = assertThrows(RequiredObjectIsNulException.class, () -> {
+           personServices.addPerson(null);
+        });
+
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains("It is not allowed to persist a null object!"));
 
 
     }
@@ -117,11 +171,26 @@ class PersonServicesTest {
         assertNotNull(response.getEmail());
         assertNotNull(response.getBirthday());
         assertNotNull(response.getPassword());
+        assertNotNull(response.getLinks());
 
         assertEquals(1L, response.getId());
         assertEquals("Joao", response.getName());
         assertEquals("joao@gmail.com", response.getEmail());
         assertEquals("123456789", response.getPassword());
+
+    }
+
+    @Test
+    void updatePersonWithNullPerson() {
+
+        Exception exception = assertThrows(RequiredObjectIsNulException.class, () -> {
+            personServices.updatePerson(null, 1L);
+        });
+
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains("It is not allowed to persist a null object!"));
+
 
     }
 
@@ -133,7 +202,7 @@ class PersonServicesTest {
 
         try {
             personServices.deletePerson(1L);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             assertEquals(ObjectNotFoundException.class, ex.getClass());
             assertEquals("Person Not Found", ex.getMessage());
 
@@ -141,9 +210,40 @@ class PersonServicesTest {
 
     }
 
-    private void startPerson(){
+    @Test
+    void deletePersonWithObjectNotFound(){
+        Mockito.when(personRepository.findById(Mockito.anyLong())).thenThrow(new ObjectNotFoundException("Person Not Found"));
+
+        try{
+            personServices.deletePerson(1L);
+        }catch (Exception ex){
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals("Person Not Found", ex.getMessage());
+        }
+    }
+
+    @Test
+    void findPersonByIdReturnObjectNotFoundException() {
+
+        Mockito.when(personRepository.findById(Mockito.anyLong())).thenThrow(new ObjectNotFoundException("Person Not Found"));
+
+        try {
+            personServices.findById(1L);
+        } catch (Exception ex) {
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals("Person Not Found", ex.getMessage());
+        }
+
+    }
+
+
+    private void startPerson() {
         person = new Person(1L, "Joao", "joao@gmail.com", "123456789", new Date(2003, Calendar.JANUARY, 4));
         personDTO = new PersonDTO(1L, "Joao", "joao@gmail.com", "123456789", new Date(2003, Calendar.JANUARY, 4));
+        listPersons.add(new Person(1L, "Joao", "joao@gmail.com", "123456789", new Date(2003, Calendar.FEBRUARY, 4)));
+        listPersons.add(new Person(2L, "Maria", "maria@gmail.com", "987654321", new Date(2000, Calendar.JANUARY, 15)));
+        listPersonDTO.add(new PersonDTO(1L, "Joao", "joao@gmail.com", "123456789", new Date(2003, Calendar.FEBRUARY, 4)));
+        listPersonDTO.add(new PersonDTO(2L, "Maria", "maria@gmail.com", "987654321", new Date(2000, Calendar.JANUARY, 15)));
     }
 
 }

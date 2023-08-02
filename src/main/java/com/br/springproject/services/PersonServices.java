@@ -4,6 +4,7 @@ import com.br.springproject.controllers.PersonController;
 import com.br.springproject.dto.PersonDTO;
 import com.br.springproject.entities.Person;
 import com.br.springproject.exceptions.ObjectNotFoundException;
+import com.br.springproject.exceptions.RequiredObjectIsNulException;
 import com.br.springproject.repositories.PersonRepository;
 import com.google.gson.reflect.TypeToken;
 import org.modelmapper.ModelMapper;
@@ -46,6 +47,9 @@ public class PersonServices {
     }
 
     public PersonDTO addPerson(PersonDTO personDTO) {
+
+        if (personDTO == null) throw new RequiredObjectIsNulException();
+
         logger.info("Adding new person");
         Person person = personRepository.save(modelMapper.map(personDTO, Person.class));
         PersonDTO pd = modelMapper.map(person, PersonDTO.class);
@@ -54,6 +58,7 @@ public class PersonServices {
     }
 
     public PersonDTO updatePerson(PersonDTO personDTO, Long id) {
+        if (personDTO == null) throw new RequiredObjectIsNulException();
         personRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("No records found for this ID!"));
         logger.info("Updating person");
         personDTO.setId(id);
