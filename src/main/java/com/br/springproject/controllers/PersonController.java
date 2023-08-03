@@ -64,7 +64,7 @@ public class PersonController {
         return ResponseEntity.ok().body(personServices.addPerson(personDTO));
     }
 
-    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping( produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Updates a Person", description = "Updates a User by passing in a JSON, representation of the Person.", tags = {"Persons"},
             responses = {
                     @ApiResponse(description = "Updated", responseCode = "200", content = {@Content(schema = @Schema(implementation = PersonDTO.class))}),
@@ -72,8 +72,8 @@ public class PersonController {
                     @ApiResponse(description = "Unauthorized", responseCode = "401", content = {@Content}),
                     @ApiResponse(description = "Not Found", responseCode = "404", content = {@Content}),
                     @ApiResponse(description = "Internal Server Error", responseCode = "500", content = {@Content})})
-    public ResponseEntity<PersonDTO> updatePerson(@RequestBody PersonDTO personDTO, @PathVariable Long id) {
-        return ResponseEntity.ok().body(personServices.updatePerson(personDTO, id));
+    public ResponseEntity<PersonDTO> updatePerson(@RequestBody PersonDTO personDTO) {
+        return ResponseEntity.ok().body(personServices.updatePerson(personDTO));
     }
 
     @DeleteMapping(value = "/{id}")

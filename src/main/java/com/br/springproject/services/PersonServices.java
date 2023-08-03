@@ -57,14 +57,14 @@ public class PersonServices {
         return pd;
     }
 
-    public PersonDTO updatePerson(PersonDTO personDTO, Long id) {
+    public PersonDTO updatePerson(PersonDTO personDTO) {
         if (personDTO == null) throw new RequiredObjectIsNulException();
-        personRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("No records found for this ID!"));
+        personRepository.findById(personDTO.getId()).orElseThrow(() -> new ObjectNotFoundException("No records found for this ID!"));
         logger.info("Updating person");
-        personDTO.setId(id);
+        personDTO.setId(personDTO.getId());
         Person person = personRepository.save(modelMapper.map(personDTO, Person.class));
         PersonDTO pd = modelMapper.map(person, PersonDTO.class);
-        pd.add(linkTo(methodOn(PersonController.class).updatePerson(personDTO, id)).withSelfRel());
+        pd.add(linkTo(methodOn(PersonController.class).updatePerson(personDTO)).withSelfRel());
         return pd;
     }
 

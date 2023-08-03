@@ -163,7 +163,7 @@ class PersonServicesTest {
         Mockito.when(personRepository.save(person)).thenReturn(person);
         Mockito.when(modelMapper.map(person, PersonDTO.class)).thenReturn(personDTO);
 
-        PersonDTO response = personServices.updatePerson(personDTO, 1L);
+        PersonDTO response = personServices.updatePerson(personDTO);
 
         assertNotNull(response);
         assertNotNull(response.getId());
@@ -184,7 +184,7 @@ class PersonServicesTest {
     void updatePersonWithNullPerson() {
 
         Exception exception = assertThrows(RequiredObjectIsNulException.class, () -> {
-            personServices.updatePerson(null, 1L);
+            personServices.updatePerson(null);
         });
 
         String actualMessage = exception.getMessage();
