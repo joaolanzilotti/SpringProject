@@ -78,6 +78,111 @@ public class PersonControllerTest extends AbstractIntegrationTest {
         assertNotNull(persistedPerson.getPassword());
         assertNotNull(persistedPerson.getBirthday());
 
+        assertEquals(4L, person.getId());
+        assertEquals("Joao", person.getName());
+        assertEquals("joao@gmail.com", person.getEmail());
+        assertEquals("123", person.getPassword());
+
+    }
+
+    @Test
+    @Order(2)
+    public void testCreateWithWrongOrigin() throws JsonMappingException, JsonProcessingException {
+        mockPerson();
+
+        specification = new RequestSpecBuilder()
+                .addHeader(TestConfig.HEADER_PARAM_ORIGIN, "https://originerrada.com")
+                .setBasePath("/person")
+                .setPort(TestConfig.SERVER_PORT)
+                .addFilter(new RequestLoggingFilter(LogDetail.ALL))
+                .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
+                .build();
+
+        var content = given().spec(specification)
+                .contentType(TestConfig.CONTENT_TYPE_JSON)
+                .body(person)
+                .when()
+                .post()
+                .then()
+                .statusCode(403)
+                .extract()
+                .body()
+                .asString();
+
+        assertNotNull(content);
+        assertEquals("Invalid CORS request", content);
+
+    }
+
+    @Test
+    @Order(3)
+    public void testFindById() throws JsonMappingException, JsonProcessingException {
+        mockPerson();
+
+        specification = new RequestSpecBuilder()
+                .addHeader(TestConfig.HEADER_PARAM_ORIGIN, TestConfig.ORIGIN_JP)
+                .setBasePath("/person")
+                .setPort(TestConfig.SERVER_PORT)
+                .addFilter(new RequestLoggingFilter(LogDetail.ALL))
+                .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
+                .build();
+
+        var content = given().spec(specification)
+                .contentType(TestConfig.CONTENT_TYPE_JSON)
+                .pathParam("id", person.getId())
+                .when()
+                .get("{id}")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .asString();
+
+        PersonDTO persistedPerson = objectMapper.readValue(content, PersonDTO.class);
+        person = persistedPerson;
+
+        assertNotNull(persistedPerson);
+
+        assertNotNull(persistedPerson.getId());
+        assertNotNull(persistedPerson.getName());
+        assertNotNull(persistedPerson.getEmail());
+        assertNotNull(persistedPerson.getPassword());
+        assertNotNull(persistedPerson.getBirthday());
+
+        assertEquals(4L, person.getId());
+        assertEquals("Joao", person.getName());
+        assertEquals("joao@gmail.com", person.getEmail());
+        assertEquals("123", person.getPassword());
+
+    }
+
+    @Test
+    @Order(4)
+    public void testFindByIdWithWrongOrigin() throws JsonMappingException, JsonProcessingException {
+        mockPerson();
+
+        specification = new RequestSpecBuilder()
+                .addHeader(TestConfig.HEADER_PARAM_ORIGIN, "https://originerrada.com")
+                .setBasePath("/person")
+                .setPort(TestConfig.SERVER_PORT)
+                .addFilter(new RequestLoggingFilter(LogDetail.ALL))
+                .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
+                .build();
+
+        var content = given().spec(specification)
+                .contentType(TestConfig.CONTENT_TYPE_JSON)
+                .pathParam("id", person.getId())
+                .when()
+                .get("{id}")
+                .then()
+                .statusCode(403)
+                .extract()
+                .body()
+                .asString();
+
+        assertNotNull(content);
+        assertEquals("Invalid CORS request", content);
+
     }
 
 
