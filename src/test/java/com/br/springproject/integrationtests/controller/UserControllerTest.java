@@ -1,13 +1,12 @@
 package com.br.springproject.integrationtests.controller;
 
 import com.br.springproject.config.TestConfig;
-import com.br.springproject.integrationtests.dto.PersonDTO;
+import com.br.springproject.integrationtests.dto.UserDTO;
 import com.br.springproject.integrationtests.testcontainer.AbstractIntegrationTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.LogDetail;
 import io.restassured.filter.log.RequestLoggingFilter;
@@ -15,8 +14,6 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static io.restassured.RestAssured.given;
@@ -28,19 +25,19 @@ import java.util.Date;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestMethodOrder(OrderAnnotation.class)
-public class PersonControllerTest extends AbstractIntegrationTest {
+public class UserControllerTest extends AbstractIntegrationTest {
 
     private static RequestSpecification specification;
     private static ObjectMapper objectMapper;
 
-    private static PersonDTO person;
+    private static UserDTO person;
 
     @BeforeAll
     public static void setup() {
         objectMapper = new ObjectMapper();
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-        person = new PersonDTO();
+        person = new UserDTO();
     }
 
     @Test
@@ -50,7 +47,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
 
         specification = new RequestSpecBuilder()
                 .addHeader(TestConfig.HEADER_PARAM_ORIGIN, TestConfig.ORIGIN_JP)
-                .setBasePath("/person")
+                .setBasePath("/user")
                 .setPort(TestConfig.SERVER_PORT)
                 .addFilter(new RequestLoggingFilter(LogDetail.ALL))
                 .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
@@ -67,7 +64,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
                 .body()
                 .asString();
 
-        PersonDTO persistedPerson = objectMapper.readValue(content, PersonDTO.class);
+        UserDTO persistedPerson = objectMapper.readValue(content, UserDTO.class);
         person = persistedPerson;
 
         assertNotNull(persistedPerson);
@@ -78,7 +75,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
         assertNotNull(persistedPerson.getPassword());
         assertNotNull(persistedPerson.getBirthday());
 
-        assertEquals(4L, person.getId());
+        assertEquals(5L, person.getId());
         assertEquals("Joao", person.getName());
         assertEquals("joao@gmail.com", person.getEmail());
         assertEquals("123", person.getPassword());
@@ -92,7 +89,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
 
         specification = new RequestSpecBuilder()
                 .addHeader(TestConfig.HEADER_PARAM_ORIGIN, "https://originerrada.com")
-                .setBasePath("/person")
+                .setBasePath("/user")
                 .setPort(TestConfig.SERVER_PORT)
                 .addFilter(new RequestLoggingFilter(LogDetail.ALL))
                 .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
@@ -121,7 +118,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
 
         specification = new RequestSpecBuilder()
                 .addHeader(TestConfig.HEADER_PARAM_ORIGIN, TestConfig.ORIGIN_JP)
-                .setBasePath("/person")
+                .setBasePath("/user")
                 .setPort(TestConfig.SERVER_PORT)
                 .addFilter(new RequestLoggingFilter(LogDetail.ALL))
                 .addFilter(new ResponseLoggingFilter(LogDetail.ALL))
@@ -138,7 +135,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
                 .body()
                 .asString();
 
-        PersonDTO persistedPerson = objectMapper.readValue(content, PersonDTO.class);
+        UserDTO persistedPerson = objectMapper.readValue(content, UserDTO.class);
         person = persistedPerson;
 
         assertNotNull(persistedPerson);
@@ -149,7 +146,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
         assertNotNull(persistedPerson.getPassword());
         assertNotNull(persistedPerson.getBirthday());
 
-        assertEquals(4L, person.getId());
+        assertEquals(5L, person.getId());
         assertEquals("Joao", person.getName());
         assertEquals("joao@gmail.com", person.getEmail());
         assertEquals("123", person.getPassword());
@@ -163,7 +160,7 @@ public class PersonControllerTest extends AbstractIntegrationTest {
 
         specification = new RequestSpecBuilder()
                 .addHeader(TestConfig.HEADER_PARAM_ORIGIN, "https://originerrada.com")
-                .setBasePath("/person")
+                .setBasePath("/user")
                 .setPort(TestConfig.SERVER_PORT)
                 .addFilter(new RequestLoggingFilter(LogDetail.ALL))
                 .addFilter(new ResponseLoggingFilter(LogDetail.ALL))

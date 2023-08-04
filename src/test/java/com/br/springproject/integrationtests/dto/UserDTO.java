@@ -1,14 +1,12 @@
 package com.br.springproject.integrationtests.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -17,7 +15,7 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PersonDTO implements Serializable {
+public class UserDTO implements Serializable {
 
     private Long id;
     private String name;

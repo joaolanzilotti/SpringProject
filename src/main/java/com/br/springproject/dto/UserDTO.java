@@ -1,7 +1,6 @@
 package com.br.springproject.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -19,7 +18,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonPropertyOrder({"id", "name", "email", "password", "birthday"})
-public class PersonDTO extends RepresentationModel<PersonDTO> implements Serializable {
+public class UserDTO extends RepresentationModel<UserDTO> implements Serializable {
 
     private Long id;
     private String name;

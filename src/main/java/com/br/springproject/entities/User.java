@@ -10,12 +10,12 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = "Persons")
+@Table(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person implements Serializable {
+public class User implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
