@@ -9,6 +9,9 @@ import com.br.springproject.repositories.UserRepository;
 import com.google.gson.reflect.TypeToken;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -18,7 +21,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @Service
-public class UserServices {
+public class UserServices implements UserDetailsService {
 
     private Logger logger = Logger.getLogger(UserServices.class.getName());
 
@@ -74,4 +77,14 @@ public class UserServices {
         userRepository.deleteById(id);
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        logger.info("Finding one User By name " + username + "!");
+        User user = userRepository.findByEmail(username);
+        if(user != null){
+            return user;
+        }else{
+            throw new UsernameNotFoundException("Username " + username + " Not found!");
+        }
+    }
 }
